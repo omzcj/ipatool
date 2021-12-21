@@ -16,8 +16,9 @@ abs_target_ipa=$(cd "$(dirname "$target_ipa")"; pwd)/$(basename "$target_ipa")
 cd $HOME
 if [[ ! -d ".ipadump" ]]; then
 	git clone https://github.com/AloneMonkey/frida-ios-dump.git .ipadump
+	cd $HOME/.ipadump
+	pipenv install
 fi
 
-cd .ipadump
-pipenv install
+cd $HOME/.ipadump
 pipenv run ./dump.py -o $abs_target_ipa $1
