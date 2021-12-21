@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+if [[ ! -n $1 ]] || [[ ! -n $2 ]]; then
+	echo "app2ipa <source.app> <target.ipa>"
+elif [ ! -d $1 ]; then
+	echo "source.app not exist"
+else
+	mkdir Payload; cp -r $1 Payload; zip -r $2 Payload; rm -r Payload
+fi
