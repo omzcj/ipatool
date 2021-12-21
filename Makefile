@@ -1,3 +1,3 @@
 build:
 	mkdir bin
-	cp -r src/ bin
+	cp src/main bin/ipatools

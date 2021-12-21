@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-
-if [[ ! -n $1 ]]; then
-	echo "ipa2app <source.ipa>"
-else
-	unzip $1; mv Payload/*.app ./; rm -rf Payload
-fi
