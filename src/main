@@ -45,7 +45,7 @@ _dump() {
 		pipenv install
 	fi
 	cd $HOME/.ipatool
-	pipenv run ./dump.py $1 -o $2
+	pipenv run ./dump.py $1 -o $abs_target_ipa
 	echo $abs_target_ipa
 }
 
