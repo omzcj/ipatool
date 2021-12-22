@@ -55,7 +55,7 @@ _dump() {
 
 	abs_target_app=${abs_target_ipa%.*}.app
 
-	if [[ $is_remove_plugins_and_watch ]]; then
+	if [[ $is_remove_plugins_and_watch == true ]]; then
 		_ipa2app $abs_target_ipa $abs_target_app
 		rm -rf $abs_target_app/PlugIns
 		rm -rf $abs_target_app/Watch
