@@ -7,7 +7,7 @@ is_remove_plugin_and_watch=false
 
 Usage() {
 	echo "Usage:
-dumpipa <app_name|app_bundleid> [target.ipa]
+dump <app_name|app_bundleid> [target.ipa]
 ipa2app <source.ipa> [target.app]
 app2ipa <source.app> [target.ipa]
 server
@@ -38,14 +38,14 @@ _dump() {
 
 	abs_target_ipa=$(cd "$(dirname "$target_ipa")"; pwd)/$(basename "$target_ipa")
 
-	# cd $HOME
-	# if [[ ! -d .ipatool ]]; then
-	# 	git clone https://github.com/AloneMonkey/frida-ios-dump.git .ipatool
-	# 	cd $HOME/.ipatool
-	# 	pipenv install
-	# fi
-	# cd $HOME/.ipatool
-	# pipenv run ./dump.py $1 -o $2
+	cd $HOME
+	if [[ ! -d .ipatool ]]; then
+		git clone https://github.com/AloneMonkey/frida-ios-dump.git .ipatool
+		cd $HOME/.ipatool
+		pipenv install
+	fi
+	cd $HOME/.ipatool
+	pipenv run ./dump.py $1 -o $2
 	echo $abs_target_ipa
 }
 
