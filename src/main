@@ -79,7 +79,18 @@ _ipa2app() {
 	fi
 	abs_target_app=$(_abs_path $target_app)
 
-	unzip $1; mv Payload/*.app $abs_target_app; rm -rf Payload
+	unzip $1
+	mv Payload/*.app $abs_target_app
+	rm -rf Payload
+	if [[ -d META-INF ]]; then
+		rm -rf META-INF
+	fi
+	if [[ -f iTunesArtwork ]]; then
+		rm iTunesArtwork
+	fi
+	if [[ -f iTunesMetadata.plist ]]; then
+		rm iTunesMetadata.plist
+	fi
 }
 
 _app2ipa() {
@@ -94,7 +105,10 @@ _app2ipa() {
 	fi
 	abs_target_ipa=$(_abs_path $target_ipa)
 
-	mkdir Payload; cp -r $1 Payload; zip -r $abs_target_ipa Payload; rm -r Payload
+	mkdir Payload
+	cp -r $1 Payload
+	zip -r $abs_target_ipa Payload
+	rm -r Payload
 }
 
 if [[ $1 == "dump" ]]; then
