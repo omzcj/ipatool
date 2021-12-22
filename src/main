@@ -3,40 +3,46 @@
 set -e
 set -o pipefail
 
-is_remove_plugin_and_watch=false
+is_remove_plugins_and_watch=false
 
 Usage() {
 	echo "Usage:
-dump <app_name|app_bundleid> [target.ipa]
-ipa2app <source.ipa> [target.app]
-app2ipa <source.app> [target.ipa]
-server
--r, remove plugin and watch"
+dump [-r] <app_name|app_bundleid> [target.ipa]
+	-r, remove PlugIns and Watch
+ipa2app, i2a <source.ipa> [target.app]
+app2ipa, a2i <source.app> [target.ipa]
+server"
 }
 
 while getopts r opt; do
     case $opt in
     	r)
-		is_remove_plugin_and_watch=true
+		is_remove_plugins_and_watch=true
 		;;
     esac
 done
 
 shift $[ $OPTIND -1 ]
 
+_abs_path() {
+	echo $(cd "$(dirname "$1")"; pwd)/$(basename "$1")
+}
+
 _dump() {
 	if [[ ! -n $1 ]]; then
-		echo "ipatool dump <source.app> [target.ipa]"
+		echo "ipatool dump <app_name|app_bundleid> [target.ipa]"
 		exit 0
 	fi
 
 	if [[ ! -n $2 ]]; then
-		target_ipa=$1
-	else
+		target_ipa=$1.ipa
+	elif [[ ${2##*.} == "ipa" ]]; then
 		target_ipa=$2
+	else
+		target_ipa=$2.ipa
 	fi
-
-	abs_target_ipa=$(cd "$(dirname "$target_ipa")"; pwd)/$(basename "$target_ipa")
+	
+	abs_target_ipa=$(_abs_path $target_ipa)
 
 	cd $HOME
 	if [[ ! -d .ipatool ]]; then
@@ -46,38 +52,57 @@ _dump() {
 	fi
 	cd $HOME/.ipatool
 	pipenv run ./dump.py $1 -o $abs_target_ipa
-	echo $abs_target_ipa
-}
 
-_app2ipa() {
-	if [[ ! -n $1 ]] || [[ ! -n $2 ]]; then
-		echo "app2ipa <source.app> <target.ipa>"
-	elif [ ! -d $1 ]; then
-		echo "source.app not exist"
-	else
-		mkdir Payload; cp -r $1 Payload; zip -r $2 Payload; rm -r Payload
+	abs_target_app=${abs_target_ipa%.*}.app
+
+	if [[ $is_remove_plugins_and_watch ]]; then
+		_ipa2app $abs_target_ipa $abs_target_app
+		rm -rf $abs_target_app/PlugIns
+		rm -rf $abs_target_app/Watch
+		rm $abs_target_ipa
+		_app2ipa $abs_target_app $abs_target_ipa
+		rm -rf $abs_target_app
 	fi
+
 }
 
 _ipa2app() {
-	if [[ ! -n $1 ]]; then
-		echo "ipa2app <source.ipa>"
-	else
-		unzip $1; mv Payload/*.app ./; rm -rf Payload
+	if [[ ! -n $1 ]] || [[ ! -f $1 ]]; then
+		echo "ipatool ipa2app <source.ipa> [target.ipa]"
+		exit 0
 	fi
+ 
+	if [[ ! -n $2 ]]; then
+		target_app=${1%.*}.app
+	else
+		target_app=$2
+	fi
+	abs_target_app=$(_abs_path $target_app)
+
+	unzip $1; mv Payload/*.app $abs_target_app; rm -rf Payload
 }
 
-_remove_plugin_and_watch() {
-	rm -rf $1/PlugIns
-	rm -rf $1/Watch
+_app2ipa() {
+	if [[ ! -n $1 ]] || [[ ! -d $1 ]]; then
+		echo "ipatool app2ipa <source.app> <target.ipa>"
+	fi
+
+	if [[ ! -n $2 ]]; then
+		target_ipa=${1%.*}.ipa
+	else
+		target_ipa=$2
+	fi
+	abs_target_ipa=$(_abs_path $target_ipa)
+
+	mkdir Payload; cp -r $1 Payload; zip -r $abs_target_ipa Payload; rm -r Payload
 }
 
 if [[ $1 == "dump" ]]; then
 	_dump $2 $3
-elif [[ $1 == "app2ipa" ]]; then
-	_app2ipa $2 $3
-elif [[ $1 == "ipa2app" ]]; then
+elif [[ $1 == "ipa2app" ]] || [[ $1 == "i2a" ]]; then
 	_ipa2app $2 $3
+elif [[ $1 == "app2ipa" ]] || [[ $1 == "a2i" ]]; then
+	_app2ipa $2 $3
 elif [[ $1 == "server" ]]; then
 	/usr/local/bin/iproxy 2222:22
 else
