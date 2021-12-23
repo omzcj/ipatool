@@ -118,7 +118,7 @@ elif [[ $1 == "ipa2app" ]] || [[ $1 == "i2a" ]]; then
 elif [[ $1 == "app2ipa" ]] || [[ $1 == "a2i" ]]; then
 	_app2ipa $2 $3
 elif [[ $1 == "server" ]]; then
-	/usr/local/bin/iproxy 2222:22
+	/usr/local/bin/iproxy 2222:22 3333:3333
 else
 	Usage
 fi
